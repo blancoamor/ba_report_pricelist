@@ -66,7 +66,7 @@ class saved_price_list(models.Model):
 
         ids=[]
         categorys = []
-        _logger.info('uno %r' ,self.category_ids)
+        args = []
         if self.category_ids : 
 
             for parent_id in self.category_ids:
