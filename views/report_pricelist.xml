@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="utf-8"?>
+<openerp>
+<data>
+        <record id="view_save_product_price_list_tree" model="ir.ui.view">
+            <field name="name">saved.price_list.tree</field>
+            <field name="model">saved.price_list</field>
+            <field name="arch" type="xml">
+                <tree string="listas">
+                    <field name="name"/>
+
+                </tree>
+            </field>
+        </record>
+
+
+    <!--   Product Price List -->
+
+        <record id="view_save_product_price_list" model="ir.ui.view">
+              <field name="name">Price per unit</field>
+              <field name="model">saved.price_list</field>
+              <field name="arch" type="xml">
+                <form string="Price List">
+
+                    <group string="Calculate Product Price per Unit Based on Pricelist Version.">
+                        <field name="name"/>
+                        <field name="category_ids"/>
+                        <field name="has_image"/>
+                        <field name="has_stock"/>
+                        <field name="price_list" widget="selection"/>
+                        <field name="qty1"/>
+                        <field name="qty2"/>
+                        <field name="qty3"/>
+                        <field name="qty4"/>
+                        <field name="qty5"/>
+                    </group>
+
+                    <footer>
+                        <button name="print_report" string="Print"  type="object" class="oe_highlight"  />
+                        or
+                        <button string="Cancel" class="oe_link" special="cancel" />
+                    </footer>
+                </form>
+              </field>
+        </record>
+
+
+
+
+        <record id="save_product_price_list" model="ir.actions.act_window">
+            <field name="name">Crear lista de precios</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">saved.price_list</field>
+            <field name="view_type">form</field>
+            <field name="view_id" ref="view_save_product_price_list_tree"/>
+        </record>
+
+
+
+
+     <menuitem action="save_product_price_list" id="action_save_product_price_list" parent="base.menu_product" sequence="30"/>
+
+
+
+
+             <report
+    id="product_product_images"
+    model="product.product"
+    string="Images"
+    report_type="qweb-pdf"
+    name="ba_report_pricelist.report_product_product_images"
+    file="report_pricelist"
+    attachment_use="False"
+/>
+<template id="report_product_product_images">
+    <t t-call="report.html_container">
+            <t t-call="report.external_layout">
+                <div class="page">
+                    <h2>Productos</h2>
+                    <table class="table table-condensed" style="font-size:12px">
+                        <t t-as="o" t-foreach="docs">
+                            <tr>
+
+                                <td>
+
+                                  <span  t-if="o.product_tmpl_id.image_small"> <span t-field="o.product_tmpl_id.image_small" t-field-options="{&quot;widget&quot;: &quot;image&quot;, &quot;class&quot;: &quot;img-rounded&quot;}" />
+                                </span>
+                                </td>
+                                <td>
+                                    <span t-field="o.default_code"/>
+                                </td>
+                                <td>
+                                    <strong  t-field="o.name"/><br/>
+                                    <span  t-field="o.description"/>
+                                </td>
+                                <td>
+                                    <strong  t-field="o.price_with_tax"/>
+                                </td>
+                                <td>
+                                <t t-as="s" t-foreach="o.seller_ids">
+                                    <span  t-field="s.name"/>
+                                </t>
+                                </td>
+
+                            </tr>
+                        </t>
+                    </table>
+                </div>
+            </t>
+    </t>
+</template>
+
+
+
+
+
+<template id="ba_report_pricelist">
+    <t t-call="report.html_container">
+        <t t-call="report.external_layout">
+            <div class="page">
+                <h2>Price List</h2>
+
+                <div class="row mt32 mb32">
+                    <div class="col-xs-3">
+                        <strong>Price List Name</strong>:<br/>
+                        <span t-esc="get_pricelist(data['form']['price_list'])"/>
+                    </div>
+                    <div class="col-xs-3">
+                        <strong>Currency</strong>:<br/>
+                        <span t-esc="get_currency(data['form']['price_list'])"/>
+                    </div>
+                    <div class="col-xs-3">
+                        <strong>Print date</strong>:<br/>
+                        <t t-esc="formatLang(time.strftime('%Y-%m-%d'), date=True)"/>
+                    </div>
+                </div>
+
+                <table class="table table-condensed">
+                    <thead>
+                        <tr>
+                            <th>
+                                <strong>Description</strong>
+                            </th>
+                            <t t-foreach="get_titles(data['form'])" t-as="k">
+                                <th t-if="k.has_key('qty1')"><strong t-esc="k['qty1']"/></th>
+                                <th t-if="k.has_key('qty2')"><strong t-esc="k['qty2']"/></th>
+                                <th t-if="k.has_key('qty3')"><strong t-esc="k['qty3']"/></th>
+                                <th t-if="k.has_key('qty4')"><strong t-esc="k['qty4']"/></th>
+                                <th t-if="k.has_key('qty5')"><strong t-esc="k['qty5']"/></th>
+                            </t>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <t t-foreach="get_categories(objects,data['form'])" t-as="c">
+                            <tr>
+                                <td colspan="100">
+                                    <strong t-esc="c['name']"/>
+                                </td>
+                            </tr>
+                            <tr t-foreach="c['products']" t-as="p">
+                                <td>
+                                    <t t-if="p.get('code')">
+                                        [<span t-esc="p['code']"/>]
+                                    </t> 
+                                    <span t-esc="p['name']"/>
+                                </td>
+                                <td t-if="p.has_key('qty1') and p['qty1']"><strong t-esc="p['qty1']"/></td>
+                                <td t-if="p.has_key('qty2') and p['qty2']"><strong t-esc="p['qty2']"/></td>
+                                <td t-if="p.has_key('qty3') and p['qty3']"><strong t-esc="p['qty3']"/></td>
+                                <td t-if="p.has_key('qty4') and p['qty4']"><strong t-esc="p['qty4']"/></td>
+                                <td t-if="p.has_key('qty5') and p['qty5']"><strong t-esc="p['qty5']"/></td>
+                            </tr>
+                        </t>
+                    </tbody>
+                </table>
+            </div>
+        </t>
+    </t>
+</template>
+        <report 
+            id="action_report_pricelist" 
+            string="Pricelist" 
+            model="product.product" 
+            report_type="qweb-pdf" 
+            name="ba_report_pricelist.ba_report_pricelist" 
+            file="ba_report_pricelist.ba_report_pricelist"
+        menu="False"/>
+
+        
+</data>
+</openerp>
