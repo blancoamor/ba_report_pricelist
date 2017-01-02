@@ -19,4 +19,4 @@
 #
 ##############################################################################
 import report_pricelist
-#import product_pricelist
+import report_product_product_images

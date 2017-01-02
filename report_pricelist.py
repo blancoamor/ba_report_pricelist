@@ -1,4 +1,3 @@
-
 # -*- coding: utf-8 -*-
 ##############################################################################
 #
@@ -20,7 +19,7 @@
 #
 ##############################################################################
 
-from datetime import datetime , timedelta 
+from datetime import datetime , timedelta ,  date 
 from dateutil import parser
 
 from openerp import models, fields, api ,  SUPERUSER_ID
@@ -35,6 +34,24 @@ import requests
 from lxml import etree
 
 _logger = logging.getLogger(__name__) 
+
+
+class product_product(models.Model):
+    _inherit = 'product.product'
+
+    def _get_price(self, pricelist_id, product_id, qty,tax):
+        if (tax):
+            tax = 1.21
+        else :            
+            tax = 1
+
+        pricelist_obj =  self.pool.get('product.pricelist')
+        return pricelist_obj.price_get(
+                self._cr, self._uid, [pricelist_id],
+                product_id, 1.0,
+                1, {
+                    'uom': 1,
+                })[pricelist_id] * tax
 
 
 
@@ -53,13 +70,10 @@ class saved_price_list(models.Model):
     supplier_ids = fields.Many2many('res.partner','saved_pricelist_supplier_rel','list_id','suplier_id','Vendedor')
     has_image = fields.Boolean('Solo con imagen')
     has_stock = fields.Boolean('Solo con stock')
-
-
-    qty1 = fields.Integer('Cantidad 1' , default=1)
-    qty2 = fields.Integer('Cantidad 2' , default=0)
-    qty3 = fields.Integer('Cantidad 3' , default=0)
-    qty4 = fields.Integer('Cantidad 4' , default=0)
-    qty5 = fields.Integer('Cantidad 5' , default=0)
+    show_stock = fields.Boolean('Mostrar stock')
+    show_tax = fields.Boolean('Totales con impuesto')
+    show_supplier = fields.Boolean('Mostar proveedor')
+    format = fields.Selection([('list', 'Lista'),('catalog', 'Catalogo'),('twice', 'Ambos')])
 
     @api.multi
     def print_report(self):
@@ -71,25 +85,38 @@ class saved_price_list(models.Model):
 
             for parent_id in self.category_ids:
                 childs = self.env['product.category'].search([('id','child_of',parent_id.id)])
-                _logger.info('dos %r ',childs )
 
                 for child in childs:
                     categorys.append(child.id)
 
             args.append(('categ_id','in',categorys))
 
+        if self.supplier_ids:
+            supplier_ids = [x.id for x in self.supplier_ids] 
+            #supplier_ids = self.env['product.supplierinfo'].search([('name','in',supplier_ids)])
+            #supplier_ids = [x.id for x in supplier_ids] 
+
+            args.append(('seller_ids.name','in',supplier_ids))
+
         if self.has_image :
             args.append(('image','<>',False)) 
 
         if self.has_stock :
             args.append(('qty_available','>',1)) 
+
+        _logger.info ("args %r", args)
+
         
-        products_tmpl_ids = self.env['product.template'].search(args)        
-        products_tmpl_ids = [ x.id for x in products_tmpl_ids]
+        #products_tmpl_ids = self.env['product.template'].search(args)        
+        #_logger.info ("products_tmpl_ids %r", products_tmpl_ids)
+        #products_tmpl_ids = [ x.id for x in products_tmpl_ids]
 
-        products_ids = self.env['product.product'].search([('product_tmpl_id','in',products_tmpl_ids)])        
+        products_ids = self.env['product.product'].search(args,
+                order='default_code')        
+        #products_ids = self.env['product.product'].search([('product_tmpl_id','in',products_tmpl_ids)],
+        #        order='default_code')        
         #products=self.env['product.product'].browse(products_ids)
-
+        _logger.info(self.format)
         products_ids = [x.id for x in products_ids]
 
 
@@ -98,20 +125,23 @@ class saved_price_list(models.Model):
                         'ids': products_ids , 
                         'form' : {
                             'price_list' : self.price_list.id,
-                            'qty1' : self.qty1,
-                            'qty2' : self.qty2,
-                            'qty3' : self.qty3,
-                            'qty4' : self.qty4,
-                            'qty5' : self.qty5,
+                            'has_image' : self.has_image ,
+                            'has_stock' : self.has_stock ,
+                            'show_stock' : self.show_stock ,
+                            'show_tax' : self.show_tax ,
+                            'show_supplier' : self.show_supplier,
+                            'format' : self.format
+
+          
                         
                         },                
                         'report_type': 'qweb-pdf',
-                        'nodestroy': True
+                        'nodestroy': False
                        }
         
         return {
             'type': 'ir.actions.report.xml',            
-            'report_name':'ba_report_pricelist.report_product_product_images',            
+            'report_name':'ba_report_pricelist.report_product_pricelist_images',            
             'datas': data
             }
 

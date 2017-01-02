@@ -23,15 +23,15 @@
 
                     <group string="Calculate Product Price per Unit Based on Pricelist Version.">
                         <field name="name"/>
-                        <field name="category_ids"/>
+                        <field name="price_list" widget="selection"/>
+                        <field name="category_ids" widget="many2many_tags"/>
+                        <field name="supplier_ids" widget="many2many_tags" domain="[('supplier','=',1)]"/>
                         <field name="has_image"/>
                         <field name="has_stock"/>
-                        <field name="price_list" widget="selection"/>
-                        <field name="qty1"/>
-                        <field name="qty2"/>
-                        <field name="qty3"/>
-                        <field name="qty4"/>
-                        <field name="qty5"/>
+                        <field name="show_stock"/>
+                        <field name="show_tax"/>
+                        <field name="show_supplier"/>
+                        <field name="format"/>
                     </group>
 
                     <footer>
@@ -63,19 +63,27 @@
 
 
              <report
-    id="product_product_images"
+    id="product_product_list_images"
     model="product.product"
     string="Images"
     report_type="qweb-pdf"
-    name="ba_report_pricelist.report_product_product_images"
+    name="ba_report_pricelist.report_product_pricelist_images"
     file="report_pricelist"
     attachment_use="False"
 />
-<template id="report_product_product_images">
+<template id="report_product_pricelist_images">
     <t t-call="report.html_container">
             <t t-call="report.external_layout">
                 <div class="page">
-                    <h2>Productos</h2>
+                    <h2>Lista de Articulos</h2>
+
+        <div class="row mt32 mb32">
+                    <div class="col-xs-3">
+                        <strong>Fecha de impresión</strong>:<br/>
+                        <t t-esc="time.strftime('%d/%m/%Y')"/>
+                    </div>
+                </div>
+
                     <table class="table table-condensed" style="font-size:12px">
                         <t t-as="o" t-foreach="docs">
                             <tr>
@@ -91,19 +99,26 @@
                                 <td>
                                     <strong  t-field="o.name"/><br/>
                                     <span  t-field="o.description"/>
+                                    <div t-if="form['show_stock']">
+                                         Disponible: <span  t-field="o.product_tmpl_id.qty_available"/>
+
+                                    </div>
                                 </td>
                                 <td>
-                                    <strong  t-field="o.price_with_tax"/>
+                                    <strong  t-esc="o._get_price(form['price_list'], o.id, 1,form['show_tax'])"/>
+
                                 </td>
-                                <td>
-                                <t t-as="s" t-foreach="o.seller_ids">
-                                    <span  t-field="s.name"/>
-                                </t>
+                                <td t-if="form['show_supplier']">
+
+                                    <t t-as="s" t-foreach="o.seller_ids">
+                                        <span  t-field="s.name"/>
+                                    </t>
                                 </td>
 
                             </tr>
                         </t>
                     </table>
+
                 </div>
             </t>
     </t>
