@@ -73,6 +73,7 @@ class saved_price_list(models.Model):
     show_stock = fields.Boolean('Mostrar stock')
     show_tax = fields.Boolean('Totales con impuesto')
     show_supplier = fields.Boolean('Mostar proveedor')
+    show_descripcion = fields.Boolean('Mostar Descripcion')
     format = fields.Selection([('list', 'Lista'),('catalog', 'Catalogo'),('twice', 'Ambos')])
 
     @api.multi
@@ -99,7 +100,7 @@ class saved_price_list(models.Model):
             args.append(('seller_ids.name','in',supplier_ids))
 
         if self.has_image :
-            args.append(('image','<>',False)) 
+            args.append(('image','!=',False)) 
 
         if self.has_stock :
             args.append(('qty_available','>',1)) 
@@ -125,11 +126,13 @@ class saved_price_list(models.Model):
                         'ids': products_ids , 
                         'form' : {
                             'price_list' : self.price_list.id,
+                            'name' : self.name ,
                             'has_image' : self.has_image ,
                             'has_stock' : self.has_stock ,
                             'show_stock' : self.show_stock ,
                             'show_tax' : self.show_tax ,
                             'show_supplier' : self.show_supplier,
+                            'show_descripcion' : self.show_descripcion ,
                             'format' : self.format
 
           

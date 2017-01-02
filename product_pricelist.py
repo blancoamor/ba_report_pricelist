@@ -36,6 +36,8 @@ class ba_product_pricelist(report_sxw.rml_parse):
             'get_categories': self._get_categories,
             'get_price': self._get_price,
             'get_titles': self._get_titles,
+            'get_titles': self._get_titles,
+
         })
 
     def _get_titles(self, form):

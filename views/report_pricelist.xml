@@ -27,7 +27,7 @@
                         <field name="category_ids" widget="many2many_tags"/>
                         <field name="supplier_ids" widget="many2many_tags" domain="[('supplier','=',1)]"/>
                         <field name="has_image"/>
-                        <field name="has_stock"/>
+                        <field name="show_descripcion"/>
                         <field name="show_stock"/>
                         <field name="show_tax"/>
                         <field name="show_supplier"/>
@@ -75,7 +75,12 @@
     <t t-call="report.html_container">
             <t t-call="report.external_layout">
                 <div class="page">
+                <div t-if="form['name']">
+                                    <h2  t-esc="form['name']"/>
+                </div>
+                <div t-if="not form['name']">
                     <h2>Lista de Articulos</h2>
+                </div>
 
         <div class="row mt32 mb32">
                     <div class="col-xs-3">
@@ -98,14 +103,14 @@
                                 </td>
                                 <td>
                                     <strong  t-field="o.name"/><br/>
-                                    <span  t-field="o.description"/>
+                                    <span t-if="form['show_descripcion']" t-esc="o.description"/>
                                     <div t-if="form['show_stock']">
                                          Disponible: <span  t-field="o.product_tmpl_id.qty_available"/>
 
                                     </div>
                                 </td>
                                 <td>
-                                    <strong  t-esc="o._get_price(form['price_list'], o.id, 1,form['show_tax'])"/>
+                                    <strong  t-esc="o._get_price(form['price_list'], o.id, 1,form['show_tax'])" t-field-options='{"widget": "monetary"}'/>
 
                                 </td>
                                 <td t-if="form['show_supplier']">
