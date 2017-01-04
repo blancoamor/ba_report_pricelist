@@ -22,6 +22,23 @@
 
 from openerp import api, models
 
+class report_product_catalog_images(models.AbstractModel):
+    _name = 'report.ba_report_pricelist.report_product_catalog_images'
+    @api.multi
+    def render_html(self, data=None):
+        report_obj = self.env['report']
+
+        report = report_obj._get_report_from_name('ba_report_pricelist.report_product_catalog_images')
+        docargs = {
+            'doc_ids': self._ids,
+            'form': data['form'],
+            'doc_model': report.model,
+            'docs': self.env['product.product'].browse(self._ids),
+        }
+        return report_obj.render('ba_report_pricelist.report_product_catalog_images', docargs)  
+
+
+
 class report_product_pricelist_images(models.AbstractModel):
     _name = 'report.ba_report_pricelist.report_product_pricelist_images'
     @api.multi

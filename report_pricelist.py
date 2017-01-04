@@ -108,18 +108,20 @@ class saved_price_list(models.Model):
         _logger.info ("args %r", args)
 
         
-        #products_tmpl_ids = self.env['product.template'].search(args)        
+        products_tmpl_ids = self.env['product.template'].search(args)        
         #_logger.info ("products_tmpl_ids %r", products_tmpl_ids)
-        #products_tmpl_ids = [ x.id for x in products_tmpl_ids]
+        products_tmpl_ids = [ x.id for x in products_tmpl_ids]
 
-        products_ids = self.env['product.product'].search(args,
-                order='default_code')        
-        #products_ids = self.env['product.product'].search([('product_tmpl_id','in',products_tmpl_ids)],
+        #products_ids = self.env['product.product'].search(args,
         #        order='default_code')        
-        #products=self.env['product.product'].browse(products_ids)
-        _logger.info(self.format)
+        products_ids = self.env['product.product'].search([('product_tmpl_id','in',products_tmpl_ids)],
+                order='default_code')        
+        products=self.env['product.product'].browse(products_ids)
         products_ids = [x.id for x in products_ids]
-
+        if self.format == "list" :
+            report='ba_report_pricelist.report_product_pricelist_images'
+        else :
+            report='ba_report_pricelist.report_product_catalog_images'
 
         data = {                    
                         'model':'product.product',                    
@@ -144,7 +146,7 @@ class saved_price_list(models.Model):
         
         return {
             'type': 'ir.actions.report.xml',            
-            'report_name':'ba_report_pricelist.report_product_pricelist_images',            
+            'report_name':report,            
             'datas': data
             }
 

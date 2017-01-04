@@ -1,210 +1,162 @@
 <?xml version="1.0" encoding="utf-8"?>
 <openerp>
-<data>
+    <data>
         <record id="view_save_product_price_list_tree" model="ir.ui.view">
             <field name="name">saved.price_list.tree</field>
             <field name="model">saved.price_list</field>
             <field name="arch" type="xml">
                 <tree string="listas">
-                    <field name="name"/>
-
+                    <field name="name" />
                 </tree>
             </field>
         </record>
-
-
-    <!--   Product Price List -->
-
+        <!--   Product Price List -->
         <record id="view_save_product_price_list" model="ir.ui.view">
-              <field name="name">Price per unit</field>
-              <field name="model">saved.price_list</field>
-              <field name="arch" type="xml">
+            <field name="name">Price per unit</field>
+            <field name="model">saved.price_list</field>
+            <field name="arch" type="xml">
                 <form string="Price List">
-
-                    <group string="Calculate Product Price per Unit Based on Pricelist Version.">
-                        <field name="name"/>
-                        <field name="price_list" widget="selection"/>
-                        <field name="category_ids" widget="many2many_tags"/>
-                        <field name="supplier_ids" widget="many2many_tags" domain="[('supplier','=',1)]"/>
-                        <field name="has_image"/>
-                        <field name="show_descripcion"/>
-                        <field name="show_stock"/>
-                        <field name="show_tax"/>
-                        <field name="show_supplier"/>
-                        <field name="format"/>
+                    <group string="Diseño de la Lista de precios .">
+                        <field name="name" />
+                        <field name="price_list" widget="selection" />
+                        <field name="category_ids" widget="many2many_tags" />
+                        <field name="supplier_ids" widget="many2many_tags" domain="[('supplier','=',1)]" />
+                        <field name="has_image" />
+                        <field name="has_stock" />
+                        <field name="show_descripcion" />
+                        <field name="show_stock" />
+                        <field name="show_tax" />
+                        <field name="show_supplier" />
+                        <field name="format" />
                     </group>
-
                     <footer>
-                        <button name="print_report" string="Print"  type="object" class="oe_highlight"  />
+                        <button name="print_report" string="Print" type="object" class="oe_highlight" />
                         or
-                        <button string="Cancel" class="oe_link" special="cancel" />
-                    </footer>
+                        <button string="Cancel" class="oe_link" special="cancel" /></footer>
                 </form>
-              </field>
+            </field>
         </record>
-
-
-
-
         <record id="save_product_price_list" model="ir.actions.act_window">
             <field name="name">Crear lista de precios</field>
             <field name="type">ir.actions.act_window</field>
             <field name="res_model">saved.price_list</field>
             <field name="view_type">form</field>
-            <field name="view_id" ref="view_save_product_price_list_tree"/>
+            <field name="view_id" ref="view_save_product_price_list_tree" />
         </record>
 
+        <menuitem id="menu_mkt_price_list" name="Listas de precios" parent="base.marketing_menu" sequence="5"/>
 
-
-
-     <menuitem action="save_product_price_list" id="action_save_product_price_list" parent="base.menu_product" sequence="30"/>
-
-
-
-
-             <report
-    id="product_product_list_images"
-    model="product.product"
-    string="Images"
-    report_type="qweb-pdf"
-    name="ba_report_pricelist.report_product_pricelist_images"
-    file="report_pricelist"
-    attachment_use="False"
-/>
-<template id="report_product_pricelist_images">
-    <t t-call="report.html_container">
-            <t t-call="report.external_layout">
-                <div class="page">
-                <div t-if="form['name']">
-                                    <h2  t-esc="form['name']"/>
-                </div>
-                <div t-if="not form['name']">
-                    <h2>Lista de Articulos</h2>
-                </div>
-
-        <div class="row mt32 mb32">
-                    <div class="col-xs-3">
-                        <strong>Fecha de impresión</strong>:<br/>
-                        <t t-esc="time.strftime('%d/%m/%Y')"/>
-                    </div>
-                </div>
-
-                    <table class="table table-condensed" style="font-size:12px">
-                        <t t-as="o" t-foreach="docs">
-                            <tr>
-
-                                <td>
-
-                                  <span  t-if="o.product_tmpl_id.image_small"> <span t-field="o.product_tmpl_id.image_small" t-field-options="{&quot;widget&quot;: &quot;image&quot;, &quot;class&quot;: &quot;img-rounded&quot;}" />
-                                </span>
-                                </td>
-                                <td>
-                                    <span t-field="o.default_code"/>
-                                </td>
-                                <td>
-                                    <strong  t-field="o.name"/><br/>
-                                    <span t-if="form['show_descripcion']" t-esc="o.description"/>
-                                    <div t-if="form['show_stock']">
-                                         Disponible: <span  t-field="o.product_tmpl_id.qty_available"/>
-
-                                    </div>
-                                </td>
-                                <td>
-                                    <strong  t-esc="o._get_price(form['price_list'], o.id, 1,form['show_tax'])" t-field-options='{"widget": "monetary"}'/>
-
-                                </td>
-                                <td t-if="form['show_supplier']">
-
-                                    <t t-as="s" t-foreach="o.seller_ids">
-                                        <span  t-field="s.name"/>
-                                    </t>
-                                </td>
-
-                            </tr>
-                        </t>
-                    </table>
-
-                </div>
-            </t>
-    </t>
-</template>
-
-
-
-
-
-<template id="ba_report_pricelist">
-    <t t-call="report.html_container">
-        <t t-call="report.external_layout">
-            <div class="page">
-                <h2>Price List</h2>
-
-                <div class="row mt32 mb32">
-                    <div class="col-xs-3">
-                        <strong>Price List Name</strong>:<br/>
-                        <span t-esc="get_pricelist(data['form']['price_list'])"/>
-                    </div>
-                    <div class="col-xs-3">
-                        <strong>Currency</strong>:<br/>
-                        <span t-esc="get_currency(data['form']['price_list'])"/>
-                    </div>
-                    <div class="col-xs-3">
-                        <strong>Print date</strong>:<br/>
-                        <t t-esc="formatLang(time.strftime('%Y-%m-%d'), date=True)"/>
-                    </div>
-                </div>
-
-                <table class="table table-condensed">
-                    <thead>
-                        <tr>
-                            <th>
-                                <strong>Description</strong>
-                            </th>
-                            <t t-foreach="get_titles(data['form'])" t-as="k">
-                                <th t-if="k.has_key('qty1')"><strong t-esc="k['qty1']"/></th>
-                                <th t-if="k.has_key('qty2')"><strong t-esc="k['qty2']"/></th>
-                                <th t-if="k.has_key('qty3')"><strong t-esc="k['qty3']"/></th>
-                                <th t-if="k.has_key('qty4')"><strong t-esc="k['qty4']"/></th>
-                                <th t-if="k.has_key('qty5')"><strong t-esc="k['qty5']"/></th>
-                            </t>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <t t-foreach="get_categories(objects,data['form'])" t-as="c">
-                            <tr>
-                                <td colspan="100">
-                                    <strong t-esc="c['name']"/>
-                                </td>
-                            </tr>
-                            <tr t-foreach="c['products']" t-as="p">
-                                <td>
-                                    <t t-if="p.get('code')">
-                                        [<span t-esc="p['code']"/>]
-                                    </t> 
-                                    <span t-esc="p['name']"/>
-                                </td>
-                                <td t-if="p.has_key('qty1') and p['qty1']"><strong t-esc="p['qty1']"/></td>
-                                <td t-if="p.has_key('qty2') and p['qty2']"><strong t-esc="p['qty2']"/></td>
-                                <td t-if="p.has_key('qty3') and p['qty3']"><strong t-esc="p['qty3']"/></td>
-                                <td t-if="p.has_key('qty4') and p['qty4']"><strong t-esc="p['qty4']"/></td>
-                                <td t-if="p.has_key('qty5') and p['qty5']"><strong t-esc="p['qty5']"/></td>
-                            </tr>
-                        </t>
-                    </tbody>
-                </table>
-            </div>
-        </t>
-    </t>
-</template>
-        <report 
-            id="action_report_pricelist" 
-            string="Pricelist" 
-            model="product.product" 
-            report_type="qweb-pdf" 
-            name="ba_report_pricelist.ba_report_pricelist" 
-            file="ba_report_pricelist.ba_report_pricelist"
-        menu="False"/>
-
+        <menuitem action="save_product_price_list" id="action_save_product_price_list" parent="menu_mkt_price_list" sequence="30" />
         
-</data>
+        <report id="product_product_list_images" model="product.product" string="Images" report_type="qweb-pdf" name="ba_report_pricelist.report_product_pricelist_images" file="report_pricelist" attachment_use="False" />
+        
+        <report id="product_product_catalog_images" model="product.product" string="Images" report_type="qweb-pdf" name="ba_report_pricelist.report_product_catalog_images" file="report_pricelist" attachment_use="False" />
+
+
+        <template id="report_product_pricelist_images">
+            <t t-call="report.html_container">
+                <t t-call="report.external_layout">
+                    <div class="page">
+                        <div t-if="form['name']">
+                            <h2 t-esc="form['name']" />
+                        </div>
+                        <div t-if="not form['name']">
+                            <h2>Lista de Articulos</h2>
+                        </div>
+                        <div class="row mt32 mb32">
+                            <div class="col-xs-3">
+                                <strong>Fecha de impresión</strong>:<br /><t t-esc="time.strftime('%d/%m/%Y')" /></div>
+                        </div>
+                        <table class="table table-condensed" style="font-size:12px">
+                            <t t-as="o" t-foreach="docs">
+                                <tr>
+                                    <td>
+                                        <span t-if="o.product_tmpl_id.image_medium">
+                                            <t t-if="form['show_descripcion']"> 
+
+                                                <span t-field="o.product_tmpl_id.image_medium" t-field-options="{&quot;widget&quot;: &quot;image&quot;, &quot;class&quot;: &quot;img-rounded&quot;}" />
+                                            </t>
+                                            <t t-if="form['show_descripcion']==False"> 
+
+                                                <span t-field="o.product_tmpl_id.image_small" t-field-options="{&quot;widget&quot;: &quot;image&quot;, &quot;class&quot;: &quot;img-rounded&quot;}" />
+                                            </t>
+
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span t-field="o.default_code" />
+                                    </td>
+                                    <td>
+                                        <strong t-field="o.name" />
+                                        <div t-if="form['show_descripcion']" style="font-size:0.8em;" > <t t-esc="o.description"/> </div>
+
+                                        <div t-if="form['show_stock']">
+                                         Disponible: <span t-field="o.product_tmpl_id.qty_available" /></div>
+                                    </td>
+                                    <td>
+                                        <strong t-esc="o._get_price(form['price_list'], o.id, 1,form['show_tax'])" t-field-options="{&quot;widget&quot;: &quot;monetary&quot;}" />
+                                    </td>
+                                    <td t-if="form['show_supplier']">
+                                        <t t-as="s" t-foreach="o.seller_ids">
+                                            <span t-field="s.name" />
+                                        </t>
+                                    </td>
+                                </tr>
+                            </t>
+                        </table>
+                    </div>
+                </t>
+            </t>
+        </template>
+        <template id="report_product_catalog_images">
+            <t t-call="report.html_container">
+                <t t-call="report.external_layout">
+                    <div class="page">
+                        <div t-if="form['name']">
+                            <h2 t-esc="form['name']" />
+                        </div>
+                        <t t-if="form['show_descripcion']"> 
+                            <t t-set="alto" t-value="450"/>
+                        </t>
+                        <t t-if="form['show_descripcion']==False"> 
+                            <t t-set="alto" t-value="290"/>
+                        </t>
+
+
+                        <div class="row mt32 mb32">
+                            <t t-as="o" t-foreach="docs">
+                                <div class="col-xs-4 " style="page-break-inside: avoid;">
+                                    <div class="thumbnail" t-attf-style="height:{{ alto }}px; overflow:hidden;">
+                                    <div t-field="o.default_code" />
+                                    <div t-if="o.product_tmpl_id.image_medium" class="img img-responsive full-width" style="height:150px; overflow:hidden;" >
+                                        <img t-att-src="'data:image/png;base64,%s' % o.product_tmpl_id.image_medium" style="max-height:150px;width:inherit;"/>
+                                    </div>
+                                    <strong t-field="o.name" />
+                                    <br />
+                                    <div t-if="form['show_descripcion']" style="font-size:0.8em;height:160px; overflow:hidden;" > <t t-esc="o.description"/> </div>
+                                    <div t-if="form['show_stock']">
+                                         Disponible: <span t-field="o.product_tmpl_id.qty_available" /></div>
+                                    <h3 style="text-align:right;" >$ <strong t-esc="round(o._get_price(form['price_list'], o.id, 1,form['show_tax']),2)" /></h3>
+                                    <t t-if="form['show_supplier']">
+                                        <br/><t t-as="s" t-foreach="o.seller_ids">
+                                            <span t-field="s.name" />
+                                        </t>
+                                    </t>
+                                </div>
+                                </div>
+                            </t>
+                        </div>
+               
+                        <div class="row mt32 mb32">
+
+                            <div class="col-xs-3">
+                                <strong>Fecha de impresión</strong>:<br /><t t-esc="time.strftime('%d/%m/%Y')" /></div>
+                        </div>
+                    </div>
+                </t>
+            </t>
+        </template>
+
+        <report id="action_report_pricelist" string="Pricelist" model="product.product" report_type="qweb-pdf" name="ba_report_pricelist.ba_report_pricelist" file="ba_report_pricelist.ba_report_pricelist" menu="False" />
+    </data>
 </openerp>
