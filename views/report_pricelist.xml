@@ -93,8 +93,8 @@
                                         <div t-if="form['show_stock']">
                                          Disponible: <span t-field="o.product_tmpl_id.qty_available" /></div>
                                     </td>
-                                    <td>
-                                        <strong t-esc="o._get_price(form['price_list'], o.id, 1,form['show_tax'])" t-field-options="{&quot;widget&quot;: &quot;monetary&quot;}" />
+                                    <td style="text-align:right;">
+                                        $ <strong t-esc="'%.2f'%round(o._get_price(form['price_list'], o.id, 1,form['show_tax']))"  />
                                     </td>
                                     <td t-if="form['show_supplier']">
                                         <t t-as="s" t-foreach="o.seller_ids">
@@ -136,7 +136,7 @@
                                     <div t-if="form['show_descripcion']" style="font-size:0.8em;height:160px; overflow:hidden;" > <t t-esc="o.description"/> </div>
                                     <div t-if="form['show_stock']">
                                          Disponible: <span t-field="o.product_tmpl_id.qty_available" /></div>
-                                    <h3 style="text-align:right;" >$ <strong t-esc="round(o._get_price(form['price_list'], o.id, 1,form['show_tax']),2)" /></h3>
+                                    <h3 style="text-align:right;" >$ <strong t-esc="'%.2f'%|round(o._get_price(form['price_list'], o.id, 1,form['show_tax']),2)" /></h3>
                                     <t t-if="form['show_supplier']">
                                         <br/><t t-as="s" t-foreach="o.seller_ids">
                                             <span t-field="s.name" />
